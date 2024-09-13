@@ -1,0 +1,22 @@
+name: Reboot VM
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [reboot-vm]
+
+jobs:
+  reboot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Reboot VM
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo reboot'
