@@ -8,10 +8,13 @@ jobs:
   reboot:
     runs-on: ubuntu-latest
     steps:
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Create SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Reboot VM
         env:
@@ -19,3 +22,7 @@ jobs:
           VM_HOST: ${{ secrets.VM_HOST }}
         run: |
           ssh -o StrictHostKeyChecking=no $VM_USER@$VM_HOST 'sudo reboot'
+
+      - name: Clean up
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
